@@ -191,16 +191,6 @@ def pm():
             listdb.append(listTemp)
 
     return render_template('pm.html', inventory=listdb)
-    
-            
-
-
-
-
-
-    
-
-
 
 
     #code for display 
