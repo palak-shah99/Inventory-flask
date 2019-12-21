@@ -1,0 +1,106 @@
+{% extends 'base-template.html' %}
+{% block content %}
+<body>
+    <div class="container">
+        <div class="table-wrapper">
+            <div class="table-title">
+                <div class="row">
+                    <div class="col-sm-8"><h2><b>Product Details</b></h2></div>
+                    <div class="col-sm-4">
+                        <button type="button" class="btn btn-info add-new"
+                        data-toggle="modal" data-target="#abcd"><i class="fa fa-plus"></i> Add New</button>
+                       
+                        <div class="modal fade" id="abcd" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                              <div class="modal-content">
+                                  
+                                <form method="POST" action="{{url_for('product')}}">
+                                    <div class="modal-header">
+                                    <h3 class="modal-title" id="exampleModalLongTitle">Add product</h3>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    </div>
+                                    <div class="modal-body">
+                                      <b>  Product name: </b> <input type="text" name ="name" placeholder="Enter product name" />
+                                        <br><br>
+                                       <b> Quantity:</b> <input type="text" name ="quant" placeholder="Enter quantity" />
+                                    </div>
+                                    <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Add</button>
+                                    
+                                    </div>
+                                    
+                                </form>
+    
+                              </div>
+                            </div>
+                          </div>
+                    
+                    
+                    </div>
+                </div>
+            </div>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>         
+                        <th>Product ID</th>
+                        <th>Product Name</th>
+                        <th>Quantity</th>
+                        <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for p in product %}
+                    <tr>
+                        <td>{{ p[0] }}</td>
+                        <td>{{ p[1] }}</td>
+                        <td>{{ p[2] }}</td>
+                        <td>
+                            <button type="button" data-toggle="modal" data-target="#edit_{{ p[0] }}">
+                        <a class="edit" title="Edit" ><i class="material-icons">&#xE254;</i></a>
+                    </button>
+                    <div class="modal fade" id="edit_{{ p[0] }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                          <div class="modal-content">
+                              
+                            <form method="POST" action="{{url_for('edit', type='product')}}">
+                                <div class="modal-header">
+                                <h3 class="modal-title" id="exampleModalLongTitle">EDIT</h3>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                </div>
+                                <div class="modal-body">
+                                    <b>Product id: </b><input type="text" name="pid" value={{p[0]}} readonly />
+                                    <br><br>
+                                    <b>Product name: </b> <input type="text" name ="name" placeholder={{p[1]}} />
+                                    <br><br>
+                                    <b>Quantity: </b> <input type="text" name ="quant" placeholder={{p[2]}} />
+                                    
+                                </div>
+                                <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Save changes</button>
+                                
+
+                                </div>
+                                
+                            </form>
+
+                          </div>
+                        </div>
+                      </div>
+                        <a class="delete" href="{{ url_for('delete', pid=p[0], type='product') }}">
+                        <i class="material-icons">&#xE872;</i></a>
+                        </td>  
+                    </tr>
+                {% endfor %}
+                  </tbody>
+                
+            </table>
+        </div>
+    </div>
+</body> 
+{% endblock %}                          

@@ -1,0 +1,99 @@
+{% extends 'base-template.html' %}
+{% block content %}
+<body>
+    <div class="container">
+        <div class="table-wrapper">
+            <div class="table-title">
+                <div class="row">
+                    <div class="col-sm-8"><h2><b>Location Details</b></h2></div>
+                    <div class="col-sm-3">
+                        <button type="button" class="btn btn-info add-new"
+                        data-toggle="modal" data-target="#abcd"><i class="fa fa-plus"></i> Add New</button>
+                       
+                        <div class="modal fade" id="abcd" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                              <div class="modal-content">
+                                  
+                                <form method="POST" action="{{url_for('location')}}">
+                                    <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLongTitle">Add location</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <b>location name:</b> <input type="text" name ="locname" placeholder="Enter location" />
+                                    </div>
+                                    <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Add</button>
+                                    
+                                    </div>
+                                    
+                                </form>
+    
+                              </div>
+                            </div>
+                          </div>
+                    
+                    
+                    </div>
+                </div>
+            </div>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>         
+                        <th>location ID</th>
+                        <th>location Name</th>
+                        <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for l in location %} 
+                    <tr>
+                        <td>{{ l[0] }}</td>
+                        <td>{{ l[1] }}</td>
+                        <td>
+                            <button type="button" data-toggle="modal" data-target="#edit_{{ l[0] }}">
+                        <a class="edit" title="Edit" ><i class="material-icons">&#xE254;</i></a>
+                    </button>
+                    <div class="modal fade" id="edit_{{ l[0] }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                          <div class="modal-content">
+                              
+                            <form method="POST" action="{{url_for('edit', type='location')}}">
+                                <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLongTitle">EDIT</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                </div>
+                                <div class="modal-body">
+                                    <b>location id: </b><input type="text" name="lid" value={{l[0]}} readonly />
+                                    <br><br>
+                                    <b>location name:</b>  <input type="text" name ="locname" placeholder={{l[1]}} />
+                                </div>
+                                <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Save changes</button>
+                                
+
+                                </div>
+                                
+                            </form>
+
+                          </div>
+                        </div>
+                      </div>
+                        <a class="delete" href="{{ url_for('delete', lid=l[0], type='location') }}">
+                        <i class="material-icons">&#xE872;</i></a>
+                        </td>  
+                    </tr>
+                {% endfor %}
+                  </tbody>
+                
+            </table>
+        </div>
+    </div>
+</body> 
+{% endblock %}                          
