@@ -136,7 +136,7 @@ def edit():
         
         return render(url_for("/"))
 
-@app.route('/pm', methods=['GET','POST'])
+@app.route('/', methods=['GET','POST'])
 def pm():
     init_db()
 
