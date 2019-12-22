@@ -22,17 +22,17 @@ The inventory management system keeps a track of products stored at various loca
 #### Product 
 The product page performs CRUD operations on products. Initially products created are unallocated.
 
-![](screenshots/1.gif)
+![](Screenshots/1.gif)
 
 
 #### Location
 The location page performs CRUD operation on locations. Initially location have no products allocated to it. 
 
-![](screenshots/2.gif)
+![](Screenshots/2.gif)
 
 #### Summary 
 The Summary page has three componenets. The inventory details, Movement form and the transaction details. 
 
-![](screenshots/3.gif)
+![](Screenshots/3.gif)
 
 
