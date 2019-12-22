@@ -27,11 +27,80 @@
                         <td>{{ l[2] }}</td>
                     </tr>
                 {% endfor %}
+                  </tbody>      
+            </table>
+        </div>
+    </div>
+
+
+    <div class="container">
+        <div class="table-wrapper">
+            <div class="table-title">
+                <div class="row">
+                    <div class="col-sm-8"><h2><b>Transaction Details</b></h2></div> 
+                </div>
+            </div>
+            <form method="post" action="{{url_for('pm')}}">
+            <input type="text" name="prdname" placeholder="product name"/>
+            <br><br>
+            
+            <input type="text" name="frmloc" placeholder="from_loc"/>
+            <br><br>
+               
+            <input type="text" name="toloc" placeholder="to_loc"/>
+            <br><br>
+            
+            <input type="text" name="qty" placeholder="Quantiy"/>
+            <br><br>
+            <input type='submit' value='submit'/>
+        </form>
+        </div>
+        
+    </div>
+
+
+    <div class="container">
+        <div class="table-wrapper">
+            <div class="table-title">
+                <div class="row">
+                    <div class="col-sm-8"><h2><b>Transaction Details</b></h2></div>
+                    <div class="col-sm-6">
+
+                    </div>
+                </div>
+            </div>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>      
+                        <th>transaction ID</th>
+                        <th>Timestamp</th>
+                        <th>From </th>
+                        <th>To</th>
+                        <th>product ID</th>
+                        <th>quantiy</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for p in pm %}
+                    <tr>
+                        <td>{{ p[0] }}</td>
+                        <td>{{ p[1] }}</td>
+                        <td>{{ p[2] }}</td>
+                        <td>{{ p[3] }}</td>
+                        <td>{{ p[4] }}</td>
+                        <td>{{ p[5] }}</td>
+                    </tr>
+                {% endfor %}
                   </tbody>
                 
             </table>
         </div>
     </div>
+
+
+
+
+
 
 </body> 
 {% endblock %}                          

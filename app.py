@@ -139,10 +139,82 @@ def edit():
 @app.route('/', methods=['GET','POST'])
 def pm():
     init_db()
-
     listdb = []
-
     cur = mysql.connection.cursor()
+
+    cur.execute("SELECT * FROM location")
+    from_loc = cur.fetchall()
+
+    cur.execute("SELECT * FROM product")
+    from_prod = cur.fetchall()
+    
+    
+    cur.execute("SELECT * FROM productmove")
+    pmdb = cur.fetchall()
+
+    cur.execute("SELECT * FROM inventory")
+    from_inv = cur.fetchall()
+
+
+    if (request.method == 'POST'):
+        prdname=request.form['prdname']
+        floc=request.form['frmloc']
+        tloc=request.form['toloc']
+        qty=request.form['qty']
+
+    
+        cur.execute("select pid from product where prdname = '"+prdname+"'")
+        pid=cur.fetchall()
+        if(floc == ""):
+            old_lid = 0 
+            
+            cur.execute("select lid from location where locname = '"+tloc+"'")
+            lid=cur.fetchone()
+
+        elif(tloc == ""):
+
+            cur.execute("select lid from location where locname = '"+floc+"'")
+            old_lid = cur.fetchone()[0]
+            
+            lid=0
+            
+        else:
+            
+            cur.execute("select lid from location where locname = '"+floc+"'")
+            old_lid = cur.fetchone()[0]
+            
+            cur.execute("select lid from location where locname = '"+tloc+"'")
+            lid = cur.fetchone()[0]
+            
+        
+        cur.execute("select exists( select qty from inventory where lid = %s and pid = %s ) " , (lid, pid ) )
+        abc = cur.fetchone() 
+        
+        if(abc[0]==1):
+            cur.execute("select qty from inventory where lid=%s and pid=%s",(lid,pid))
+            qty_old=cur.fetchone()
+            print(qty_old[0])
+            qty_new= qty_old[0] +  int(qty) # try now thts wat i was doing  
+            cur.execute("update inventory set qty= %s where lid=%s and pid=%s",(qty_new,lid,pid) ) 
+        else:
+            cur.execute("insert into inventory (lid,pid,qty) values(%s,%s,%s)",(lid,pid,qty))
+
+        cur.execute("select qty from inventory where pid = %s and lid = %s ",(pid[0], old_lid) )
+        unallocqty = cur.fetchone()
+
+        newqty = unallocqty[0] - int(qty)
+        if newqty == 0:
+            cur.execute("delete from inventory where lid=%s and pid=%s",(old_lid , pid[0]) )
+
+        else:
+            
+            cur.execute("update inventory set qty=%s where lid=%s and pid=%s",(newqty,old_lid , pid))
+                    
+        #display transaction
+        cur.execute("insert into productmove (floc,tloc,pid,qty) values(%s,%s,%s,%s)",(old_lid,lid,pid,qty))
+        mysql.connection.commit()
+
+            
     cur.execute("SELECT * FROM location")
     from_loc = cur.fetchall()
     #from_loc = [x for x in locdb] #[id name]
@@ -171,15 +243,12 @@ def pm():
             b = [prod[1] for prod in from_prod if (i[2] == prod[0])]
             listTemp.append(b[0])
             listTemp.append(i[3])
-
-            print(listTemp)
         else: 
             listTemp.append("Unallocated")
             b = [prod[1] for prod in from_prod if (i[2] == prod[0])]
             listTemp.append(b[0])
             listTemp.append(i[3])
             
-            print(listTemp)
         listdb.append(listTemp)
     for i in from_loc:
         listTemp = [] 
@@ -187,13 +256,14 @@ def pm():
             listTemp.append(i[1])
             listTemp.append("No Product")
             listTemp.append(0)
-            print(listTemp)
             listdb.append(listTemp)
 
-    return render_template('pm.html', inventory=listdb)
+    return render_template('pm.html', inventory=listdb, pm=pmdb )
 
 
     #code for display 
+
+
     # fetch location product and pm
     
     # for every location find what product is in that location and what quantity
