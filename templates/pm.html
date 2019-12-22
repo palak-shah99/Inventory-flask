@@ -40,20 +40,24 @@
                     <div class="col-sm-8"><h2><b>Transaction Details</b></h2></div> 
                 </div>
             </div>
+            <div class="modal-body" style="text-align:center">
             <form method="post" action="{{url_for('pm')}}">
-            <input type="text" name="prdname" placeholder="product name"/>
+            <input  type="text" name="prdname" placeholder="Product name"/>
             <br><br>
             
-            <input type="text" name="frmloc" placeholder="from_loc"/>
+            <input type="text" name="frmloc" placeholder="From location"/>
             <br><br>
                
-            <input type="text" name="toloc" placeholder="to_loc"/>
+            <input type="text" name="toloc" placeholder="To location"/>
             <br><br>
             
             <input type="text" name="qty" placeholder="Quantiy"/>
             <br><br>
+
             <input type='submit' value='submit'/>
+            </form>
         </form>
+        </div>
         </div>
         
     </div>

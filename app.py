@@ -90,13 +90,20 @@ def delete():
     cur = mysql.connection.cursor()
     if frompage == 'location':
         lid = request.args.get('lid')
+
+        cur.execute("update inventory set lid=0 where lid = ("+lid+")")
+
         cur.execute("delete from location where lid = ("+lid+")")
         mysql.connection.commit()
         return redirect(url_for('location'))
 
     if frompage == 'product':
         p_id = request.args.get('pid')
+
+        cur.execute("delete from inventory where pid= ("+p_id+")")
+        
         cur.execute("delete from product where pid = ("+p_id+")")
+        
         mysql.connection.commit()
         return redirect(url_for('product'))
 
@@ -127,8 +134,8 @@ def edit():
 
             if prodname:
                 cur.execute("update product set prdname = ('"+prodname+"') where pid = ("+pid+")")
-            if qty:
-                cur.execute("update product set qty = ("+qty+") where pid = ("+pid+")")
+            #if qty:
+            #    cur.execute("update product set qty = ("+qty+") where pid = ("+pid+")")
 
             mysql.connection.commit()
             
