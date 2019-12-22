@@ -21,7 +21,7 @@
                                         <span aria-hidden="true">&times;</span>
                                     </button>
                                     </div>
-                                    <div class="modal-body">
+                                    <div class="modal-body" style="text-align:center">
                                         <b>location name:</b> <input type="text" name ="locname" placeholder="Enter location" />
                                     </div>
                                     <div class="modal-footer">
@@ -59,7 +59,7 @@
                     </button>
                     <div class="modal fade" id="edit_{{ l[0] }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered" role="document">
-                          <div class="modal-content">
+                          <div class="modal-content" >
                               
                             <form method="POST" action="{{url_for('edit', type='location')}}">
                                 <div class="modal-header">
@@ -68,7 +68,7 @@
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                                 </div>
-                                <div class="modal-body">
+                                <div class="modal-body" style="text-align:center" >
                                     <b>location id: </b><input type="text" name="lid" value={{l[0]}} readonly />
                                     <br><br>
                                     <b>location name:</b>  <input type="text" name ="locname" placeholder={{l[1]}} />

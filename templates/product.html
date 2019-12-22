@@ -21,7 +21,7 @@
                                         <span aria-hidden="true">&times;</span>
                                     </button>
                                     </div>
-                                    <div class="modal-body">
+                                    <div class="modal-body" style="text-align:center">
                                       <b>  Product name: </b> <input type="text" name ="name" placeholder="Enter product name" />
                                         <br><br>
                                        <b> Quantity:</b> <input type="text" name ="quant" placeholder="Enter quantity"  />
@@ -63,7 +63,7 @@
                     </button>
                     <div class="modal fade" id="edit_{{ p[0] }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered" role="document">
-                          <div class="modal-content">
+                          <div class="modal-content" style="text-align:center" >
                               
                             <form method="POST" action="{{url_for('edit', type='product')}}">
                                 <div class="modal-header">
@@ -72,7 +72,7 @@
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                                 </div>
-                                <div class="modal-body">
+                                <div class="modal-body" style="text-align:center">
                                     <b>Product id: </b><input type="text" name="pid" value={{p[0]}} readonly />
                                     <br><br>
                                     <b>Product name: </b> <input type="text" name ="name" placeholder={{p[1]}} />
