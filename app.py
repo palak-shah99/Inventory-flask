@@ -16,20 +16,20 @@ app.config['MYSQL_DB']='sql12316323'
 
 app.config['MYSQL_HOST']='sql12.freemysqlhosting.net'
 app.config['MYSQL_USER']='sql12316562'
+app.config['MYSQL_PORT']=3306
 app.config['MYSQL_PASSWORD']='AfwDRVUJJh'
 app.config['MYSQL_DB']='sql12316562'
 
 
-mysql = MySQL(app)
+mysql = MySQL(app)  #initialization
 
 
 def init_db():
-    cur = mysql.connection.cursor()
+    cur = mysql.connection.cursor() #establishing the connection
     cur.execute("create table if not exists product(pid Int primary key Auto_Increment,prdname varchar(50),qty Int)")
     cur.execute("create table if not exists location(lid Int primary key Auto_Increment,locname varchar(50))")
     cur.execute("create table if not exists productmove(mid Int primary key Auto_Increment,time_st Timestamp DEFAULT CURRENT_TIMESTAMP,floc int null,tloc int null, pid Int not null , qty int)")
     cur.execute("create table if not exists inventory(iid int primary key auto_increment, lid int default '0', pid int, qty int )")
-    #cur.execute("CREATE TRIGGER `removeInventory` AFTER INSERT ON `productmove`  FOR EACH ROW BEGIN delete from inventory where qty = 0;   END;" )
     
     mysql.connection.commit()
 
@@ -111,13 +111,12 @@ def delete():
 
 @app.route('/edit', methods=['POST', 'GET'])
 def edit():
-    #some databse code
     init_db() 
     cur = mysql.connection.cursor()
     frompage = request.args.get('type')
     if(request.method == 'POST'):
 
-        if frompage == 'location' :
+        if frompage == 'location':
             loc_id = request.form['lid']
             loc_name = request.form['locname']
             
@@ -141,11 +140,11 @@ def edit():
             
             return redirect(url_for('product'))
         
-        return render(url_for("/"))
+        return render(url_for("product"))
 
 @app.route('/', methods=['GET','POST'])
 def pm():
-    init_db()
+    init_db() 
     listdb = []
     cur = mysql.connection.cursor()
 
@@ -200,8 +199,8 @@ def pm():
         if(abc[0]==1):
             cur.execute("select qty from inventory where lid=%s and pid=%s",(lid,pid))
             qty_old=cur.fetchone()
-            print(qty_old[0])
-            qty_new= qty_old[0] +  int(qty) # try now thts wat i was doing  
+            #print(qty_old[0])
+            qty_new= qty_old[0] +  int(qty)  
             cur.execute("update inventory set qty= %s where lid=%s and pid=%s",(qty_new,lid,pid) ) 
         else:
             cur.execute("insert into inventory (lid,pid,qty) values(%s,%s,%s)",(lid,pid,qty))
@@ -240,7 +239,7 @@ def pm():
 
     
     # listdb [ listdb_temp , listdb_temp ]
-
+    #Code to display inventory table 
     for i in from_inv:
         listTemp = []
         if(i[1] != 0):
@@ -266,22 +265,6 @@ def pm():
             listdb.append(listTemp)
 
     return render_template('pm.html', inventory=listdb, pm=pmdb )
-
-
-    #code for display 
-
-
-    # fetch location product and pm
-    
-    # for every location find what product is in that location and what quantity
-    ''' for location id :
-        for that location id in pm :
-            find the pid :
-            display 
-        display unallocated 
-    '''# display every product that is unallocated 
-
-
 
 if __name__=="__main__":
     app.run(debug= True)
