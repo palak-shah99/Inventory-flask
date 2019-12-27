@@ -1,0 +1,45 @@
+{% extends 'base-template.html' %}
+{% block content %}
+<body>
+    <div class="container">
+        <div class="table-wrapper">
+            <div class="table-title">
+                <div class="row">
+                    <div class="col-sm-8"><h2><b>Transaction Details</b></h2></div>
+                    <div class="col-sm-6">
+
+                    </div>
+                </div>
+            </div>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>      
+                        <th>transaction ID</th>
+                        <th>Timestamp</th>
+                        <th>From </th>
+                        <th>To</th>
+                        <th>product ID</th>
+                        <th>quantiy</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for p in pm %}
+                    <tr>
+                        <td>{{ p[0] }}</td>
+                        <td>{{ p[1] }}</td>
+                        <td>{{ p[2] }}</td>
+                        <td>{{ p[3] }}</td>
+                        <td>{{ p[4] }}</td>
+                        <td>{{ p[5] }}</td>
+                    </tr>
+                {% endfor %}
+                  </tbody>
+                
+            </table>
+        </div>
+    </div>
+</body> 
+{% endblock %}                          
+
+
+

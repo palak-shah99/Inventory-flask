@@ -1,6 +1,9 @@
 {% extends 'base-template.html' %}
 {% block content %}
 <body>
+    {% for e in error %}
+        {{ e }}
+    {% endfor %}
     <div class="container">
         <div class="table-wrapper">
             <div class="table-title">
@@ -23,7 +26,6 @@
                                     </div>
                                     <div class="modal-body" style="text-align:center">
                                       <b>  Product name: </b> <input type="text" name ="name" placeholder="Enter product name" />
-                                        <br><br>
                                        <b> Quantity:</b> <input type="text" name ="quant" placeholder="Enter quantity"  />
                                     </div>
                                     <div class="modal-footer">
@@ -48,6 +50,7 @@
                         <th>Product ID</th>
                         <th>Product Name</th>
                         <th>Quantity</th>
+                        <th>Unallocated</th>
                         <th>Actions</th>
                 </tr>
                 </thead>
@@ -57,10 +60,12 @@
                         <td>{{ p[0] }}</td>
                         <td>{{ p[1] }}</td>
                         <td>{{ p[2] }}</td>
+                        <td>{{ p[3] }}</td>
+                        
                         <td>
-                            <button type="button" data-toggle="modal" data-target="#edit_{{ p[0] }}">
-                        <a class="edit" title="Edit" ><i class="material-icons">&#xE254;</i></a>
-                    </button>
+                        
+                        <a class="edit" data-toggle="modal" data-target="#edit_{{ p[0] }}" title="Edit" ><i class="material-icons">&#xE254;</i></a>
+        
                     <div class="modal fade" id="edit_{{ p[0] }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered" role="document">
                           <div class="modal-content" style="text-align:center" >
@@ -77,28 +82,23 @@
                                     <br><br>
                                     <b>Product name: </b> <input type="text" name ="name" placeholder={{p[1]}} />
                                     <br><br>
-                                    <b>Quantity: </b> <input type="text" name ="quant" value={{p[2]}} readonly />
+                                    <b>Quantity: </b> <input type="text" name ="quant" placeholder={{p[2]}}  />
                                     
                                 </div>
                                 <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                                 <button type="submit" class="btn btn-primary">Save changes</button>
-                                
-
                                 </div>
-                                
                             </form>
-
                           </div>
                         </div>
                       </div>
-                        <a class="delete" href="{{ url_for('delete', pid=p[0], type='product') }}">
+                        <a class="delete" href="deleteproc/ {{ p[0] }}">
                         <i class="material-icons">&#xE872;</i></a>
                         </td>  
                     </tr>
                 {% endfor %}
-                  </tbody>
-                
+                  </tbody>    
             </table>
         </div>
     </div>

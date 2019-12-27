@@ -1,6 +1,13 @@
 {% extends 'base-template.html' %}
 {% block content %}
 <body>
+        <table>
+            {% for e in error %}
+            <tr> 
+                <td>{{ e }}</td>
+            </tr>
+            {% endfor %}
+        </table>
     <div class="container">
         <div class="table-wrapper">
             <div class="table-title">
@@ -42,70 +49,44 @@
             </div>
             <div class="modal-body" style="text-align:center">
             <form method="post" action="{{url_for('pm')}}">
-            <input  type="text" name="prdname" placeholder="Product name"/>
+           
+            <input name= "prdname" id="prod_name" list="products" placeholder="Product Name" class="form-control" autocomplete="off" required autofocus>
+                    <datalist id="products">
+                        {% for product in products %}
+                            <option value="{{ product[0] }}" id="prod_{{ product[0] }}">{{ product[1] }}</option>
+                        {% endfor %}
+                    </datalist>
             <br><br>
+            <input name= "floc" id="lid" list="location" placeholder="From location" class="form-control"  autocomplete="off"  autofocus>
+                    <datalist id="location">
+                        {% for l in location %}
+                        <option value="{{ l[0] }}" value="{{ l[0] }}">{{ l[1] }}</option>
+                        {% endfor %}
+                    </datalist>
             
-            <input type="text" name="frmloc" placeholder="From location"/>
             <br><br>
-               
-            <input type="text" name="toloc" placeholder="To location"/>
-            <br><br>
-            
-            <input type="text" name="qty" placeholder="Quantiy"/>
+            <input name= "toloc" id="lid" list="location" placeholder="To location" class="form-control" autocomplete="off"  autofocus>
+                    <datalist id="location">
+                        {% for l in location %}
+                            <option value="{{ l[0] }}" value="{{ l[0] }}">{{ l[1] }}</option>
+                        {% endfor %}
+                    </datalist>
+            <br><br>    
+            <input type="text" name="qty" list="products1"  placeholder="Quantiy" class="form-control" autocomplete="off" required autofocus />
+            <datalist id="products1">
+                {% for product in products %}
+                    <option value="{{ product[3] }}" >{{ product[1] }}</option>
+                {% endfor %}
+            </datalist>
+    
             <br><br>
 
             <input type='submit' value='submit'/>
             </form>
         </form>
         </div>
-        </div>
-        
+        </div> 
     </div>
-
-
-    <div class="container">
-        <div class="table-wrapper">
-            <div class="table-title">
-                <div class="row">
-                    <div class="col-sm-8"><h2><b>Transaction Details</b></h2></div>
-                    <div class="col-sm-6">
-
-                    </div>
-                </div>
-            </div>
-            <table class="table table-bordered">
-                <thead>
-                    <tr>      
-                        <th>transaction ID</th>
-                        <th>Timestamp</th>
-                        <th>From </th>
-                        <th>To</th>
-                        <th>product ID</th>
-                        <th>quantiy</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for p in pm %}
-                    <tr>
-                        <td>{{ p[0] }}</td>
-                        <td>{{ p[1] }}</td>
-                        <td>{{ p[2] }}</td>
-                        <td>{{ p[3] }}</td>
-                        <td>{{ p[4] }}</td>
-                        <td>{{ p[5] }}</td>
-                    </tr>
-                {% endfor %}
-                  </tbody>
-                
-            </table>
-        </div>
-    </div>
-
-
-
-
-
-
 </body> 
 {% endblock %}                          
 

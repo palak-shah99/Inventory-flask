@@ -1,118 +1,88 @@
+import os
 from flask import Flask, render_template, request, redirect, url_for
-from flask_mysqldb import MySQL
+
+import sqlite3
+
+
+DATABASE_NAME = 'inventory.sqlite'
 
 app = Flask(__name__)
-'''
-app.config['MYSQL_HOST']='db4free.net'
-app.config['MYSQL_USER']='invent123'
-app.config['MYSQL_PASSWORD']='invent123'
-app.config['MYSQL_DB']='inventory1'
-
-app.config['MYSQL_HOST']='sql12.freemysqlhosting.net'
-app.config['MYSQL_USER']='sql12316323'
-app.config['MYSQL_PASSWORD']='dbAUcBaWYi'
-app.config['MYSQL_DB']='sql12316323'
-'''
-
-app.config['MYSQL_HOST']='sql12.freemysqlhosting.net'
-app.config['MYSQL_USER']='sql12316562'
-app.config['MYSQL_PORT']=3306
-app.config['MYSQL_PASSWORD']='AfwDRVUJJh'
-app.config['MYSQL_DB']='sql12316562'
-
-
-mysql = MySQL(app)  #initialization
+app.config.from_mapping(
+    SECRET_KEY='dev',
+    DATABASE=os.path.join(app.instance_path, 'database', DATABASE_NAME),
+)
 
 
 def init_db():
-    cur = mysql.connection.cursor() #establishing the connection
-    cur.execute("create table if not exists product(pid Int primary key Auto_Increment,prdname varchar(50),qty Int)")
-    cur.execute("create table if not exists location(lid Int primary key Auto_Increment,locname varchar(50))")
-    cur.execute("create table if not exists productmove(mid Int primary key Auto_Increment,time_st Timestamp DEFAULT CURRENT_TIMESTAMP,floc int null,tloc int null, pid Int not null , qty int)")
-    cur.execute("create table if not exists inventory(iid int primary key auto_increment, lid int default '0', pid int, qty int )")
+    db = sqlite3.connect(DATABASE_NAME)
+    cur = db.cursor()
+    cur.execute("create table if not exists product(pid Integer primary key AUTOINCREMENT,prdname TEXT,qty Integer , unallocated INTEGER )")
+    cur.execute("create table if not exists location(lid Integer primary key AUTOINCREMENT,locname TEXT)")
+    cur.execute("create table if not exists productmove(mid Integer primary key AUTOINCREMENT,time_st Timestamp DEFAULT CURRENT_TIMESTAMP,floc INTEGER null,tloc INTEGER null, pid INTEGER not null , qty INTEGER)")    
     
-    mysql.connection.commit()
+    db.commit()
 
-    cur.close()
 
 @app.route('/product', methods=['GET','POST'])
 def product():
-    init_db()
-    cur = mysql.connection.cursor()
+    db = sqlite3.connect(DATABASE_NAME)
+    cur = db.cursor()
     cur.execute("SELECT * FROM product")
     product = cur.fetchall()
-
     if request.method == "POST":
         name = request.form['name']
         qty = request.form['quant']
+
+        cur.execute("insert into product (prdname,qty , unallocated) values(?,?,?)",(name,qty,qty))
         
-        try:
-            cur.execute("insert into product (prdname,qty) values(%s,%s)",(name,qty))
-            
-            cur.execute("select pid from product where prdname='"+name+"'") 
-            pid=cur.fetchone()
-            cur.execute("insert into inventory (pid,qty) values(%s,%s)" , ( pid,qty ))
-            mysql.connection.commit()
-            print("product added succefully")
-        except NameError as e:
-            print(e)
-            
-            return "error occurred"
+        cur.execute("select pid from product where prdname='"+name+"'") 
+        pid=cur.fetchone()
+        db.commit()
+        print("product added succefully")
+ 
         return redirect(url_for('product'))
 
     return render_template('product.html', product=product)
 
 @app.route('/location', methods=['GET', 'POST'])
 def location():
-    init_db()
-    cur = mysql.connection.cursor()
+    db = sqlite3.connect(DATABASE_NAME)
+    cur = db.cursor()
     cur.execute("SELECT * FROM location")
     loc = cur.fetchall()
 
     if request.method == "POST":
         locname = request.form['locname']
-        try:
-            cur.execute("INSERT INTO location (locname) VALUES ('"+locname+"')")
-            mysql.connection.commit()
-            print("location added succefully")
-        #cur.close()
-        except (NameError ) as e:
-            print(e)
+        cur.execute("INSERT INTO location (locname) VALUES ('"+locname+"')")
+        db.commit()
+        print("location added succefully")
         return redirect(url_for('location'))
     
     return render_template('location.html', location=loc)
 
+@app.route('/deleteloc/<int:lid>', methods=['POST','GET'])
+def deleteloc(lid):
 
-@app.route('/delete', methods=['POST','GET'])
-def delete():
-    init_db()
-    frompage = request.args.get('type')
-    cur = mysql.connection.cursor()
-    if frompage == 'location':
-        lid = request.args.get('lid')
+    db = sqlite3.connect(DATABASE_NAME)
+    cur = db.cursor()
+    cur.execute("delete from location where lid = ? ",  str(lid) )
+    db.commit()
+    return redirect(url_for('location'))
 
-        cur.execute("update inventory set lid=0 where lid = ("+lid+")")
-
-        cur.execute("delete from location where lid = ("+lid+")")
-        mysql.connection.commit()
-        return redirect(url_for('location'))
-
-    if frompage == 'product':
-        p_id = request.args.get('pid')
-
-        cur.execute("delete from inventory where pid= ("+p_id+")")
-        
-        cur.execute("delete from product where pid = ("+p_id+")")
-        
-        mysql.connection.commit()
-        return redirect(url_for('product'))
-
+@app.route('/deleteproc/<int:pid>', methods=['POST','GET'])
+def deleteproc(pid):
+    db = sqlite3.connect(DATABASE_NAME)
+    cur = db.cursor()
+    cur.execute("delete from product where pid = ?", str(pid))  
+    db.commit()
+    return redirect(url_for('product'))
 
 
 @app.route('/edit', methods=['POST', 'GET'])
 def edit():
-    init_db() 
-    cur = mysql.connection.cursor()
+    error = []
+    db = sqlite3.connect(DATABASE_NAME)
+    cur = db.cursor()
     frompage = request.args.get('type')
     if(request.method == 'POST'):
 
@@ -122,151 +92,151 @@ def edit():
             
             if loc_name:
                 cur.execute("update location set locname = ('"+loc_name+"') where lid = ("+loc_id+")")
-            mysql.connection.commit()
+            db.commit()
  
             return redirect(url_for('location'))    
 
         elif frompage == 'product' :
+            cur.execute("SELECT * FROM product")
+            product = cur.fetchall()
+
             pid = request.form['pid']
             prodname = request.form['name']
             qty = request.form['quant']
+            
+            cur.execute("select qty, unallocated from product where pid = ("+pid+")")
+            old_val = cur.fetchone()
+            
+            if qty:
+                if int(qty) < old_val[0]:
+                    error.append("The new value is less than the old value")
+                else:
+                    cur.execute("update product set qty = ("+qty+") where pid = ("+pid+")")
+                    qty =  int(qty) - old_val[0]
+                    qty += old_val[1]
+                    cur.execute("update product set unallocated = ("+str(qty)+") where pid = ("+pid+")")
+                    
 
             if prodname:
                 cur.execute("update product set prdname = ('"+prodname+"') where pid = ("+pid+")")
-            #if qty:
-            #    cur.execute("update product set qty = ("+qty+") where pid = ("+pid+")")
-
-            mysql.connection.commit()
             
-            return redirect(url_for('product'))
-        
-        return render(url_for("product"))
+            db.commit()
 
-@app.route('/', methods=['GET','POST'])
+            cur.execute("SELECT * FROM product")
+            product = cur.fetchall()
+                           
+            return render_template('product.html', error = error, product = product )  
+        
+@app.route('/transaction', methods=['GET','POST']) 
+def transaction():
+    db = sqlite3.connect(DATABASE_NAME)
+    cur = db.cursor()
+    cur.execute("SELECT * FROM productmove")
+    pmdb = cur.fetchall()
+    return render_template('transaction.html', pm = pmdb )
+  
+@app.route('/', methods=['GET','POST']) 
 def pm():
-    init_db() 
-    listdb = []
-    cur = mysql.connection.cursor()
 
-    cur.execute("SELECT * FROM location")
-    from_loc = cur.fetchall()
+    def makeMovement( floc , tloc, pid , qty ):
+        cur.execute("insert into productmove (floc,tloc,pid,qty) values(?,?,?,?) ", (floc, tloc, pid, qty))
 
-    cur.execute("SELECT * FROM product")
-    from_prod = cur.fetchall()
+    def setUnallocated( qty , pid):
+        cur.execute("update product set unallocated= "+str(qty)+" where pid= "+pid )
+
+    def currentQuantity(pmdb  , lid , pid ):
+        tolocval = 0 
+        for abc in [ pm[5] for pm in pmdb if pm[3] == int(lid) and pm[4] == int(pid)] :
+            tolocval += abc
+
+        fromlocval = 0
+        for abc in [ pm[5] for pm in pmdb if pm[2] == int(lid) and pm[4] == int(pid) ] :
+            fromlocval += abc
+        
+        return ( tolocval - fromlocval ) 
+
+    def findUnallocated( pid):
+        cur.execute("select unallocated from product where pid = " + pid )
+        return cur.fetchone()[0]
+
+    def fetchData():
+        cur.execute("SELECT * FROM location")
+        from_loc = cur.fetchall()
+
+        cur.execute("SELECT * FROM product")
+        from_prod = cur.fetchall()
+        
+        cur.execute("SELECT * FROM productmove")
+        pmdb = cur.fetchall()
+        
+        return from_loc , from_prod , pmdb 
+    init_db()
+    db = sqlite3.connect(DATABASE_NAME)
+    cur = db.cursor()
+    error=[]
+
+    from_loc, from_prod , pmdb = fetchData()
     
-    
-    cur.execute("SELECT * FROM productmove")
-    pmdb = cur.fetchall()
-
-    cur.execute("SELECT * FROM inventory")
-    from_inv = cur.fetchall()
-
-
     if (request.method == 'POST'):
-        prdname=request.form['prdname']
-        floc=request.form['frmloc']
+        pid=request.form['prdname']
+        floc=request.form['floc']
         tloc=request.form['toloc']
-        qty=request.form['qty']
+        qty=int(request.form['qty'])
+        if not floc: 
 
+            unalloc = findUnallocated( pid)
+            if qty > unalloc: 
+                error.append("Quantity is greater than unallocated Quantity")
+            else:
+                makeMovement( 0 , tloc , pid , qty )
+                qty = unalloc - qty 
+                setUnallocated(qty,pid)
+            
+                
+        elif not tloc:
+            cur_q = currentQuantity(pmdb ,  floc, pid )
+            
+            if qty > cur_q : 
+                error.append("Quantity is greater than current Quantity")
+            else: 
+                makeMovement( floc , 0 , pid , qty )
+                unalloc = findUnallocated( pid)
+                unalloc = unalloc + qty 
+                setUnallocated( qty,pid)
+        
+        else:
+            cur_q = currentQuantity(pmdb , floc, pid )
+            if qty > cur_q :
+                error.append("Quantity is greater than current Quantity")
+            else:
+                makeMovement( floc , tloc , pid , qty )
     
-        cur.execute("select pid from product where prdname = '"+prdname+"'")
-        pid=cur.fetchall()
-        if(floc == ""):
-            old_lid = 0 
-            
-            cur.execute("select lid from location where locname = '"+tloc+"'")
-            lid=cur.fetchone()
+    db.commit()
 
-        elif(tloc == ""):
+    from_loc, from_prod , pmdb = fetchData()
 
-            cur.execute("select lid from location where locname = '"+floc+"'")
-            old_lid = cur.fetchone()[0]
+    from_inv = [] 
+    for p in from_prod: 
+        if p[0] in [pm[4] for pm in pmdb] :
             
-            lid=0
-            
-        else:
-            
-            cur.execute("select lid from location where locname = '"+floc+"'")
-            old_lid = cur.fetchone()[0]
-            
-            cur.execute("select lid from location where locname = '"+tloc+"'")
-            lid = cur.fetchone()[0]
-            
-        
-        cur.execute("select exists( select qty from inventory where lid = %s and pid = %s ) " , (lid, pid ) )
-        abc = cur.fetchone() 
-        
-        if(abc[0]==1):
-            cur.execute("select qty from inventory where lid=%s and pid=%s",(lid,pid))
-            qty_old=cur.fetchone()
-            #print(qty_old[0])
-            qty_new= qty_old[0] +  int(qty)  
-            cur.execute("update inventory set qty= %s where lid=%s and pid=%s",(qty_new,lid,pid) ) 
-        else:
-            cur.execute("insert into inventory (lid,pid,qty) values(%s,%s,%s)",(lid,pid,qty))
-
-        cur.execute("select qty from inventory where pid = %s and lid = %s ",(pid[0], old_lid) )
-        unallocqty = cur.fetchone()
-
-        newqty = unallocqty[0] - int(qty)
-        if newqty == 0:
-            cur.execute("delete from inventory where lid=%s and pid=%s",(old_lid , pid[0]) )
-
-        else:
-            
-            cur.execute("update inventory set qty=%s where lid=%s and pid=%s",(newqty,old_lid , pid))
+            for l in from_loc : 
+                
+                listdb = []     
+                newqty = currentQuantity(pmdb ,  l[0] , p[0])
                     
-        #display transaction
-        cur.execute("insert into productmove (floc,tloc,pid,qty) values(%s,%s,%s,%s)",(old_lid,lid,pid,qty))
-        mysql.connection.commit()
+                if newqty <= 0  : 
+                    pass
+                else : 
+                    listdb.append(l[1])
+                    listdb.append(p[1])
+                    listdb.append(newqty)
+                    from_inv.append(listdb)
+                    
 
-            
-    cur.execute("SELECT * FROM location")
-    from_loc = cur.fetchall()
-    #from_loc = [x for x in locdb] #[id name]
-
-    cur.execute("SELECT * FROM product")
-    from_prod = cur.fetchall()
-    #from_prod = [x for x in prodb] #[id name qty]
-    
-    
-    cur.execute("SELECT * FROM productmove")
-    pmdb = cur.fetchall()
-
-    cur.execute("SELECT * FROM inventory")
-    from_inv = cur.fetchall()
-    #from_inv = [x for x in invdb] #[id lid pid qty]
-
-    
-    # listdb [ listdb_temp , listdb_temp ]
-    #Code to display inventory table 
-    for i in from_inv:
-        listTemp = []
-        if(i[1] != 0):
-            a = [loc[1] for loc in from_loc if (i[1] == loc[0] )] 
-            listTemp.append(a[0])
-
-            b = [prod[1] for prod in from_prod if (i[2] == prod[0])]
-            listTemp.append(b[0])
-            listTemp.append(i[3])
-        else: 
-            listTemp.append("Unallocated")
-            b = [prod[1] for prod in from_prod if (i[2] == prod[0])]
-            listTemp.append(b[0])
-            listTemp.append(i[3])
-            
-        listdb.append(listTemp)
-    for i in from_loc:
-        listTemp = [] 
-        if( i[0] not in [x[1] for x in from_inv ]):
-            listTemp.append(i[1])
-            listTemp.append("No Product")
-            listTemp.append(0)
-            listdb.append(listTemp)
-
-    return render_template('pm.html', inventory=listdb, pm=pmdb )
+    return render_template('pm.html', inventory=from_inv, error=error, products=from_prod, location=from_loc )
 
 if __name__=="__main__":
+    init_db()
     app.run(debug= True)
     
   
